@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>時間割チェッカー（新プロジェクト）</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <h1>時間割チェッカー（テスト版）</h1>
+
+  <!-- まずは「曜日＋時刻を自分で入力して判定」だけ作る -->
+  <form id="check-form">
+    <div>
+      <label for="weekday">曜日:</label>
+      <select id="weekday">
+        <option value="mon">月</option>
+        <option value="tue">火</option>
+        <option value="wed">水</option>
+        <option value="thu">木</option>
+        <option value="fri">金</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="time">時刻:</label>
+      <!-- とりあえず手動入力でテストしやすく -->
+      <input type="time" id="time" required />
+    </div>
+
+    <button type="submit">判定する</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
