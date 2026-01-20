@@ -5,6 +5,12 @@ function timeStringToMinutes(timeStr) {
   return Number(hourStr) * 60 + Number(minuteStr);
 }
 
+function minutesToTimeString(m) {
+  const h = Math.floor(m / 60);
+  const min = m % 60;
+  return String(h).padStart(2, "0") + ":" + String(min).padStart(2, "0");
+}
+
 function pad2(n) {
   return String(n).padStart(2, "0");
 }
@@ -25,44 +31,77 @@ function getNowDayKey() {
   return null; // 土日
 }
 
+function sortByStart(table) {
+  return [...table].sort((a, b) => timeStringToMinutes(a.start) - timeStringToMinutes(b.start));
+}
+
 function findCurrentState(dayKey, timeStr) {
-  const dayTable = timetable[dayKey];
-  if (!dayTable || dayTable.length === 0) {
+  const dayTableRaw = timetable[dayKey];
+  if (!dayTableRaw || dayTableRaw.length === 0) {
     return { type: "no-data" };
   }
 
+  const dayTable = sortByStart(dayTableRaw);
   const now = timeStringToMinutes(timeStr);
 
-  // 月曜のみ：昼休み 12:25〜13:10
+  // 月曜のみ：昼休み 12:25〜13:10（あなたの条件を優先）
   if (dayKey === "mon") {
     const lunchStart = timeStringToMinutes("12:25");
     const lunchEnd = timeStringToMinutes("13:10");
     if (now >= lunchStart && now < lunchEnd) {
-      return { type: "lunch", name: "昼休み", start: "12:25", end: "13:10" };
+      return { type: "lunch", start: "12:25", end: "13:10" };
     }
   }
 
+  // 授業中チェック
   for (const period of dayTable) {
     const start = timeStringToMinutes(period.start);
     const end = timeStringToMinutes(period.end);
     if (now >= start && now < end) {
-      return { type: "class", ...period };
+      return { type: "class", name: period.name, start: period.start, end: period.end };
     }
   }
 
+  // 休み時間チェック（授業と次の授業の間）
+  for (let i = 0; i < dayTable.length - 1; i++) {
+    const cur = dayTable[i];
+    const next = dayTable[i + 1];
+
+    const curEnd = timeStringToMinutes(cur.end);
+    const nextStart = timeStringToMinutes(next.start);
+
+    if (now >= curEnd && now < nextStart) {
+      return {
+        type: "break",
+        start: cur.end,
+        end: next.start,
+        nextName: next.name
+      };
+    }
+  }
+
+  // それ以外（始業前・放課後など）
   return { type: "out" };
 }
 
 function renderResult(state, resultDiv) {
   if (state.type === "class") {
     resultDiv.textContent = `今は ${state.name}（${state.start}〜${state.end}）です。`;
-  } else if (state.type === "lunch") {
-    resultDiv.textContent = `今は 昼休み（${state.start}〜${state.end}）です。`;
-  } else if (state.type === "no-data") {
-    resultDiv.textContent = "その曜日の時間割データが未設定です。";
-  } else {
-    resultDiv.textContent = "今は授業時間外です。";
+    return;
   }
+  if (state.type === "lunch") {
+    resultDiv.textContent = `今は 昼休み（${state.start}〜${state.end}）です。`;
+    return;
+  }
+  if (state.type === "break") {
+    resultDiv.textContent = `今は 休み時間（${state.start}〜${state.end}）です。次は ${state.nextName}。`;
+    return;
+  }
+  if (state.type === "no-data") {
+    resultDiv.textContent = "その曜日の時間割データが未設定です。";
+    return;
+  }
+  resultDiv.textContent = "今は授業時間外です。";
 }
 
 function judgeNow(weekdaySelect, timeInput, resultDiv) {
@@ -102,7 +141,6 @@ function setupForm() {
   timeInput.addEventListener("change", function () {
     judgeNow(weekdaySelect, timeInput, resultDiv);
   });
-
   weekdaySelect.addEventListener("change", function () {
     judgeNow(weekdaySelect, timeInput, resultDiv);
   });
