@@ -13,6 +13,14 @@ const dayPlan = {
   fri: { firstStart: "08:55", periods: 6 }
 };
 
+const lunch = {
+  mon: { start: "12:25", end: "13:10" }, // あなたの条件で固定
+  tue: { start: "12:45", end: "13:30" }, // ここは仮。あとで正確に直す
+  wed: { start: "12:45", end: "13:30" },
+  thu: { start: "12:45", end: "13:30" },
+  fri: { start: "12:45", end: "13:30" }
+};
+
 function timeStringToMinutes(timeStr) {
   const [h, m] = timeStr.split(":").map(Number);
   return h * 60 + m;
