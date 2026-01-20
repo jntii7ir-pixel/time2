@@ -15,8 +15,9 @@ function findCurrentPeriod(dayKey, timeStr) {
     const start = timeStringToMinutes(period.start);
     const end = timeStringToMinutes(period.end);
 
-    // 開始は含む、終了は含まない（例：09:40ちょうどは次の時間扱い）
-    if (now >= start && now < end) return period;
+    if (now >= start && now < end) {
+      return period;
+    }
   }
 
   return null;
@@ -28,7 +29,7 @@ function setupForm() {
   const timeInput = document.getElementById("time");
   const resultDiv = document.getElementById("result");
 
-  resultDiv.textContent = "曜日と時刻を入れて「判定する」を押してください。";
+  resultDiv.textContent = "曜日と時刻を入れて判定してください。";
 
   form.addEventListener("submit", function (event) {
     event.preventDefault();
@@ -44,7 +45,8 @@ function setupForm() {
     const period = findCurrentPeriod(dayKey, timeValue);
 
     if (period) {
-      resultDiv.textContent = `今は ${period.name}（${period.start}〜${period.end}）です。`;
+      resultDiv.textContent =
+        `今は ${period.name}（${period.start}〜${period.end}）です。`;
     } else {
       resultDiv.textContent = "今は授業時間外です。";
     }
