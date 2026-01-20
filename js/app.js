@@ -68,10 +68,12 @@ function renderResult(state, resultDiv) {
 function judgeNow(weekdaySelect, timeInput, resultDiv) {
   const dayKey = weekdaySelect.value;
   const timeValue = timeInput.value;
+
   if (!timeValue) {
     resultDiv.textContent = "時刻を入力してください。";
     return;
   }
+
   const state = findCurrentState(dayKey, timeValue);
   renderResult(state, resultDiv);
 }
@@ -90,13 +92,13 @@ function setupForm() {
   // ページを開いた瞬間に判定
   judgeNow(weekdaySelect, timeInput, resultDiv);
 
-  // ボタンで手動再判定も可能
+  // ボタンで手動再判定
   form.addEventListener("submit", function (event) {
     event.preventDefault();
     judgeNow(weekdaySelect, timeInput, resultDiv);
   });
 
-  // 時刻を変えたら即更新したい場合（任意）
+  // 曜日・時刻を変えたら即更新
   timeInput.addEventListener("change", function () {
     judgeNow(weekdaySelect, timeInput, resultDiv);
   });
