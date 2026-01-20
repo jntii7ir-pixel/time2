@@ -84,27 +84,29 @@ function findCurrentState(dayKey, timeStr) {
   return { type: "out" };
 }
 
-function renderResult(state, resultDiv) {
-  if (state.type === "class") {
-    const subjectText = state.subject ? `科目: ${state.subject}` : "科目: 未設定";
-    const roomText = state.room ? `教室: ${state.room}` : "教室: 未設定";
-    const itemsText =
-      state.items && state.items.length > 0 ? `持ち物: ${state.items.join("、")}` : "持ち物: なし/未設定";
+function minutesLeft(nowStr, endStr) {
+  return timeStringToMinutes(endStr) - timeStringToMinutes(nowStr);
+}
 
+function renderResult(state, resultDiv, nowStr) {
+  if (state.type === "class") {
+    const left = minutesLeft(nowStr, state.end);
     resultDiv.textContent =
-      `今は ${state.name}（${state.start}〜${state.end}）です。` +
-      ` ${subjectText} / ${roomText} / ${itemsText}`;
+      `今は ${state.name}（${state.start}〜${state.end}）です。終了まであと ${left} 分。`;
     return;
   }
 
   if (state.type === "lunch") {
-    resultDiv.textContent = `今は 昼休み（${state.start}〜${state.end}）です。`;
+    const left = minutesLeft(nowStr, state.end);
+    resultDiv.textContent =
+      `今は 昼休み（${state.start}〜${state.end}）です。残り ${left} 分。`;
     return;
   }
 
   if (state.type === "break") {
+    const left = minutesLeft(nowStr, state.end);
     resultDiv.textContent =
-      `今は 休み時間（${state.start}〜${state.end}）です。次は ${state.nextName}。`;
+      `今は 休み時間（${state.start}〜${state.end}）です。次は ${state.nextName}。あと ${left} 分。`;
     return;
   }
 
