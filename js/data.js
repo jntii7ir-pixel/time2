@@ -7,10 +7,10 @@ const settings = {
 
 const dayPlan = {
   mon: { firstStart: "08:55", periods: 7 },
-  tue: { firstStart: "08:55", periods: 7 },
-  wed: { firstStart: "08:55", periods: 7 },
-  thu: { firstStart: "08:55", periods: 7 },
-  fri: { firstStart: "08:55", periods: 7 }
+  tue: { firstStart: "08:55", periods: 6 },
+  wed: { firstStart: "08:55", periods: 6 },
+  thu: { firstStart: "08:55", periods: 6 },
+  fri: { firstStart: "08:55", periods: 6 }
 };
 
 function timeStringToMinutes(timeStr) {
