@@ -5,22 +5,32 @@ function timeStringToMinutes(timeStr) {
   return Number(hourStr) * 60 + Number(minuteStr);
 }
 
-function findCurrentPeriod(dayKey, timeStr) {
+function findCurrentState(dayKey, timeStr) {
   const dayTable = timetable[dayKey];
-  if (!dayTable || dayTable.length === 0) return null;
+  if (!dayTable || dayTable.length === 0) {
+    return { type: "no-data" };
+  }
 
   const now = timeStringToMinutes(timeStr);
+
+  // 月曜のみ：昼休み 12:25〜13:10 を表示
+  if (dayKey === "mon") {
+    const lunchStart = timeStringToMinutes("12:25");
+    const lunchEnd = timeStringToMinutes("13:10");
+    if (now >= lunchStart && now < lunchEnd) {
+      return { type: "lunch", name: "昼休み", start: "12:25", end: "13:10" };
+    }
+  }
 
   for (const period of dayTable) {
     const start = timeStringToMinutes(period.start);
     const end = timeStringToMinutes(period.end);
-
     if (now >= start && now < end) {
-      return period;
+      return { type: "class", ...period };
     }
   }
 
-  return null;
+  return { type: "out" };
 }
 
 function setupForm() {
@@ -42,11 +52,14 @@ function setupForm() {
       return;
     }
 
-    const period = findCurrentPeriod(dayKey, timeValue);
+    const state = findCurrentState(dayKey, timeValue);
 
-    if (period) {
-      resultDiv.textContent =
-        `今は ${period.name}（${period.start}〜${period.end}）です。`;
+    if (state.type === "class") {
+      resultDiv.textContent = `今は ${state.name}（${state.start}〜${state.end}）です。`;
+    } else if (state.type === "lunch") {
+      resultDiv.textContent = `今は 昼休み（${state.start}〜${state.end}）です。`;
+    } else if (state.type === "no-data") {
+      resultDiv.textContent = "その曜日の時間割データが未設定です。";
     } else {
       resultDiv.textContent = "今は授業時間外です。";
     }
