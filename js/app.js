@@ -86,21 +86,33 @@ function findCurrentState(dayKey, timeStr) {
 
 function renderResult(state, resultDiv) {
   if (state.type === "class") {
-    resultDiv.textContent = `今は ${state.name}（${state.start}〜${state.end}）です。`;
+    const subjectText = state.subject ? `科目: ${state.subject}` : "科目: 未設定";
+    const roomText = state.room ? `教室: ${state.room}` : "教室: 未設定";
+    const itemsText =
+      state.items && state.items.length > 0 ? `持ち物: ${state.items.join("、")}` : "持ち物: なし/未設定";
+
+    resultDiv.textContent =
+      `今は ${state.name}（${state.start}〜${state.end}）です。` +
+      ` ${subjectText} / ${roomText} / ${itemsText}`;
     return;
   }
+
   if (state.type === "lunch") {
     resultDiv.textContent = `今は 昼休み（${state.start}〜${state.end}）です。`;
     return;
   }
+
   if (state.type === "break") {
-    resultDiv.textContent = `今は 休み時間（${state.start}〜${state.end}）です。次は ${state.nextName}。`;
+    resultDiv.textContent =
+      `今は 休み時間（${state.start}〜${state.end}）です。次は ${state.nextName}。`;
     return;
   }
+
   if (state.type === "no-data") {
     resultDiv.textContent = "その曜日の時間割データが未設定です。";
     return;
   }
+
   resultDiv.textContent = "今は授業時間外です。";
 }
 
