@@ -29,27 +29,48 @@ function minutesToTimeString(mins) {
 */
 const details = {
   mon: {
-    1: { subject: "（例）数学", room: "（例）2-1", items: ["教科書", "ノート"] },
-    2: { subject: "", room: "", items: [] },
-    3: { subject: "", room: "", items: [] },
-    4: { subject: "", room: "", items: [] },
-    5: { subject: "", room: "", items: [] },
-    6: { subject: "", room: "", items: [] },
-    7: { subject: "", room: "", items: [] }
+    1: { subject: "保健", room: "", items: [] },
+    2: { subject: "英1", room: "", items: [] },
+    3: { subject: "情数", room: "", items: [] },
+    4: { subject: "数学", room: "", items: [] },
+    5: { subject: "家庭", room: "", items: [] },
+    6: { subject: "家庭", room: "", items: [] },
+    7: { subject: "科学", room: "", items: [] }
   },
   tue: {
-    1: { subject: "", room: "", items: [] },
-    2: { subject: "", room: "", items: [] },
-    3: { subject: "", room: "", items: [] },
-    4: { subject: "", room: "", items: [] },
-    5: { subject: "", room: "", items: [] },
-    6: { subject: "", room: "", items: [] },
-    7: { subject: "", room: "", items: [] }
+    1: { subject: "数学", room: "", items: [] },
+    2: { subject: "体育", room: "", items: [] },
+    3: { subject: "プログラミング技術", room: "", items: [] },
+    4: { subject: "プログラミング技術", room: "", items: [] },
+    5: { subject: "総探", room: "", items: [] },
+    6: { subject: "LH", room: "", items: [] }
   },
-  wed: {},
-  thu: {},
-  fri: {}
+  wed: {
+    1: { subject: "科学", room: "", items: [] },
+    2: { subject: "地理", room: "", items: [] },
+    3: { subject: "音美", room: "", items: [] },
+    4: { subject: "音美", room: "", items: [] },
+    5: { subject: "英コ1", room: "", items: [] },
+    6: { subject: "体育", room: "", items: [] }
+  },
+  thu: {
+    1: { subject: "英コ1", room: "", items: [] },
+    2: { subject: "電回", room: "", items: [] },
+    3: { subject: "言語", room: "", items: [] },
+    4: { subject: "工業技術基礎", room: "", items: [] },
+    5: { subject: "工業技術基礎", room: "", items: [] },
+    6: { subject: "工業技術基礎", room: "", items: [] }
+  },
+  fri: {
+    1: { subject: "言語", room: "", items: [] },
+    2: { subject: "電回", room: "", items: [] },
+    3: { subject: "地理", room: "", items: [] },
+    4: { subject: "数学", room: "", items: [] },
+    5: { subject: "情数", room: "", items: [] },
+    6: { subject: "情数", room: "", items: [] }
+  }
 };
+
 
 function getDetail(dayKey, periodNumber) {
   const day = details[dayKey] || {};
