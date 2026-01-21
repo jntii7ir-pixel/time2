@@ -94,7 +94,13 @@ function setup() {
   const result = document.getElementById("result");
 
   const dayKey = getNowDayKey();
-  if (dayKey) weekday.value = dayKey;
+  if (dayKey) {
+    weekday.value = dayKey;
+  } else {
+    // 土日は月曜を仮選択（任意）
+    weekday.value = "mon";
+  }
+
   timeInput.value = getNowTimeString();
 
   function update() {
