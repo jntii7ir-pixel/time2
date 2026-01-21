@@ -16,7 +16,7 @@ function getNowDayKey() {
   if (d === 3) return "wed";
   if (d === 4) return "thu";
   if (d === 5) return "fri";
-  return null; // 土日は null にする
+  return null; // 土日
 }
 
 function timeStringToMinutes(t) {
@@ -27,7 +27,12 @@ function timeStringToMinutes(t) {
 function findCurrentState(dayKey, timeStr) {
   const now = timeStringToMinutes(timeStr);
 
-  // 昼休み優先
+  // 土日
+  if (!dayKey) {
+    return { type: "holiday" };
+  }
+
+  // 昼休み
   const lunchInfo = lunch[dayKey];
   if (lunchInfo) {
     const s = timeStringToMinutes(lunchInfo.start);
@@ -37,14 +42,20 @@ function findCurrentState(dayKey, timeStr) {
     }
   }
 
-  const dayTable = timetable[dayKey] || [];
+  const dayTable = timetable[dayKey];
 
-  // 授業
+  // 授業中
   for (const p of dayTable) {
     const s = timeStringToMinutes(p.start);
     const e = timeStringToMinutes(p.end);
     if (now >= s && now < e) {
-      return { type: "class", ...p };
+      return {
+        type: "class",
+        period: p.name,
+        subject: p.subject,
+        start: p.start,
+        end: p.end
+      };
     }
   }
 
@@ -55,9 +66,8 @@ function findCurrentState(dayKey, timeStr) {
     if (now >= curEnd && now < nextStart) {
       return {
         type: "break",
-        start: dayTable[i].end,
-        end: dayTable[i + 1].start,
-        next: dayTable[i + 1].name
+        next: dayTable[i + 1].name,
+        nextSubject: dayTable[i + 1].subject
       };
     }
   }
@@ -65,52 +75,45 @@ function findCurrentState(dayKey, timeStr) {
   return { type: "out" };
 }
 
-function minutesLeft(now, end) {
-  return timeStringToMinutes(end) - timeStringToMinutes(now);
-}
+function render(state, resultDiv, dayKey, timeStr) {
+  const dayName = { mon:"月", tue:"火", wed:"水", thu:"木", fri:"金" }[dayKey];
 
-function render(state, resultDiv, now) {
   if (state.type === "class") {
     resultDiv.textContent =
-      `今は ${state.name}（${state.subject}）です。終了まであと ${minutesLeft(now, state.end)} 分。`;
+      `今日は${dayName}曜日。今は ${state.period}（${state.subject}）です。`;
     return;
   }
+
   if (state.type === "lunch") {
     resultDiv.textContent =
-      `今は 昼休み（${state.start}〜${state.end}）。残り ${minutesLeft(now, state.end)} 分。`;
+      `今日は${dayName}曜日。今は昼休みです。`;
     return;
   }
+
   if (state.type === "break") {
     resultDiv.textContent =
-      `今は 休み時間（${state.start}〜${state.end}）。次は ${state.next}、あと ${minutesLeft(now, state.end)} 分。`;
+      `今日は${dayName}曜日。今は休み時間です。次は ${state.next}（${state.nextSubject}）。`;
     return;
   }
-  resultDiv.textContent = "今は授業時間外です。";
+
+  if (state.type === "holiday") {
+    resultDiv.textContent = "今日は授業がありません。";
+    return;
+  }
+
+  resultDiv.textContent = "現在は授業時間外です。";
 }
 
-function setup() {
-  const weekday = document.getElementById("weekday");
-  const timeInput = document.getElementById("time");
+function update() {
   const result = document.getElementById("result");
-
   const dayKey = getNowDayKey();
-  if (dayKey) {
-    weekday.value = dayKey;
-  } else {
-    // 土日は月曜を仮選択（任意）
-    weekday.value = "mon";
-  }
-
-  timeInput.value = getNowTimeString();
-
-  function update() {
-    const state = findCurrentState(weekday.value, timeInput.value);
-    render(state, result, timeInput.value);
-  }
-
-  update();
-  weekday.addEventListener("change", update);
-  timeInput.addEventListener("change", update);
+  const timeStr = getNowTimeString();
+  const state = findCurrentState(dayKey, timeStr);
+  render(state, result, dayKey, timeStr);
 }
 
-window.addEventListener("DOMContentLoaded", setup);
+window.addEventListener("DOMContentLoaded", () => {
+  update();
+  // 1分ごとに自動更新
+  setInterval(update, 60000);
+});
