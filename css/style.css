@@ -36,6 +36,8 @@ h1 {
 }
 
 #result {
-  font-size: 20px;
-  line-height: 1.6;
+  font-size: 32px;      /* ← ここを大きく */
+  line-height: 1.5;
+  font-weight: 600;
+}
 }
