@@ -11,7 +11,12 @@ function getNowTimeString() {
 
 function getNowDayKey() {
   const d = new Date().getDay();
-  return ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][d] || null;
+  if (d === 1) return "mon";
+  if (d === 2) return "tue";
+  if (d === 3) return "wed";
+  if (d === 4) return "thu";
+  if (d === 5) return "fri";
+  return null; // 土日は null にする
 }
 
 function timeStringToMinutes(t) {
