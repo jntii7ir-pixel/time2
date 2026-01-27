@@ -9,6 +9,10 @@ function getNowTimeString() {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
+function getRoom(dayKey, periodNumber) {
+  return rooms?.[dayKey]?.[periodNumber] || "教室未設定";
+}
+
 function getNowDayKey() {
   const d = new Date().getDay();
   if (d === 1) return "mon";
