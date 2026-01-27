@@ -82,11 +82,16 @@ function findCurrentState(dayKey, timeStr) {
 function render(state, resultDiv, dayKey, timeStr) {
   const dayName = { mon:"月", tue:"火", wed:"水", thu:"木", fri:"金" }[dayKey];
 
-  if (state.type === "class") {
-    resultDiv.textContent =
-      `今日は${dayName}曜日。\n今は ${state.period}（${state.subject}）です。`;
-    return;
-  }
+ if (state.type === "class") {
+  const room = getRoom(dayKey, Number(state.period));
+  const left = minutesLeft(timeStr, state.end);
+
+  resultDiv.innerHTML =
+    `<div><strong>今は ${state.period}時間目（${state.subject}）</strong></div>` +
+    `<div class="subtime">教室：${room}</div>` +
+    `<div class="subtime">終了まであと ${left} 分</div>`;
+  return;
+}
 
   if (state.type === "lunch") {
     resultDiv.textContent =
