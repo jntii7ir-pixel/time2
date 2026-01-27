@@ -13,6 +13,10 @@ function getRoom(dayKey, periodNumber) {
   return rooms?.[dayKey]?.[periodNumber] || "教室未設定";
 }
 
+function getItems(dayKey, periodNumber) {
+  return items?.[dayKey]?.[periodNumber] || [];
+}
+
 function getNowDayKey() {
   const d = new Date().getDay();
   if (d === 1) return "mon";
