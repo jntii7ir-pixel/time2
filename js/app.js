@@ -80,19 +80,19 @@ function render(state, resultDiv, dayKey, timeStr) {
 
   if (state.type === "class") {
     resultDiv.textContent =
-      `今日は${dayName}曜日。<div>今は ${state.period}（${state.subject}）です。`;
+      `今日は${dayName}曜日。\n今は ${state.period}（${state.subject}）です。`;
     return;
   }
 
   if (state.type === "lunch") {
     resultDiv.textContent =
-      `今日は${dayName}曜日。<div>今は昼休みです。`;
+      `今日は${dayName}曜日。\n今は昼休みです。`;
     return;
   }
 
   if (state.type === "break") {
     resultDiv.textContent =
-      `今日は${dayName}曜日。<div>今は休み時間です。次は ${state.next}（${state.nextSubject}）。`;
+      `今日は${dayName}曜日。\n今は休み時間です。次は ${state.next}（${state.nextSubject}）。`;
     return;
   }
 
