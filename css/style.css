@@ -41,3 +41,25 @@ h1 {
   line-height: 1.5;
   font-weight: 600;
 }
+
+.now {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.main {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.sub {
+  font-size: 16px;
+  color: #444;
+  line-height: 1.6;
+}
+
+.sub div {
+  margin-top: 4px;
+}
