@@ -134,7 +134,7 @@ function update() {
   const dayKey = getNowDayKey();
   const timeStr = getNowTimeString();
   const state = findCurrentState(dayKey, timeStr);
-  render(state, result, dayKey, timeStr);
+  render(state, dayKey, timeStr);
 }
 
 window.addEventListener("DOMContentLoaded", () => {
