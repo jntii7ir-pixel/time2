@@ -83,43 +83,50 @@ function findCurrentState(dayKey, timeStr) {
   return { type: "out" };
 }
 
-function render(state, resultDiv, dayKey, timeStr) {
+function render(state, dayKey, timeStr) {
+  const nowDiv = document.getElementById("now");
+  const mainDiv = document.getElementById("main");
+  const roomDiv = document.getElementById("room");
+  const itemsDiv = document.getElementById("items");
+  const leftDiv = document.getElementById("left");
+
   const dayName = { mon:"月", tue:"火", wed:"水", thu:"木", fri:"金" }[dayKey];
 
-if (state.type === "class") {
-  const periodNum = Number(state.period.replace("時間目", ""));
-  const room = getRoom(dayKey, periodNum);
-  const itemList = getItems(dayKey, periodNum);
-  const left = minutesLeft(timeStr, state.end);
+  nowDiv.textContent = `${dayName}曜日 ${timeStr}`;
 
-  const itemsText = itemList.length ? itemList.join("、") : "特になし";
+  if (state.type === "class") {
+    const periodNum = Number(state.period.replace("時間目", ""));
+    const room = getRoom(dayKey, periodNum);
+    const itemList = getItems(dayKey, periodNum);
+    const left = minutesLeft(timeStr, state.end);
 
-  resultDiv.innerHTML =
-    `<div><strong>今は ${state.period}（${state.subject}）</strong></div>` +
-    `<div class="subtime">教室：${room}</div>` +
-    `<div class="subtime">持ち物：${itemsText}</div>` +
-    `<div class="subtime">終了まであと ${left} 分</div>`;
-  return;
-}
+    mainDiv.textContent = `今は ${state.period}（${state.subject}）`;
+    roomDiv.textContent = `教室：${room}`;
+    itemsDiv.textContent = `持ち物：${itemList.length ? itemList.join("、") : "特になし"}`;
+    leftDiv.textContent = `終了まであと ${left} 分`;
+    return;
+  }
 
   if (state.type === "lunch") {
-    resultDiv.textContent =
-      `今日は${dayName}曜日。\n今は昼休みです。`;
+    mainDiv.textContent = "今は昼休み";
+    roomDiv.textContent = "";
+    itemsDiv.textContent = "";
+    leftDiv.textContent = `残り ${minutesLeft(timeStr, state.end)} 分`;
     return;
   }
 
   if (state.type === "break") {
-    resultDiv.textContent =
-      `今日は${dayName}曜日。\n今は休み時間です。次は ${state.next}（${state.nextSubject}）。`;
+    mainDiv.textContent = "今は休み時間";
+    roomDiv.textContent = "";
+    itemsDiv.textContent = `次は ${state.next}（${state.nextSubject}）`;
+    leftDiv.textContent = "";
     return;
   }
 
-  if (state.type === "holiday") {
-    resultDiv.textContent = "今日は授業がありません。";
-    return;
-  }
-
-  resultDiv.textContent = "現在は授業時間外です。";
+  mainDiv.textContent = "現在は授業時間外です";
+  roomDiv.textContent = "";
+  itemsDiv.textContent = "";
+  leftDiv.textContent = "";
 }
 
 function update() {
