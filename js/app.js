@@ -150,6 +150,38 @@ function render(state, dayKey, timeStr) {
     leftDiv.textContent = "";
     return;
   }
+  
+if (state.type === "finished") {
+  const nextDayKey = getNextSchoolDayKey();
+  const nextDayName = { mon:"月", tue:"火", wed:"水", thu:"木", fri:"金" }[nextDayKey];
+
+  const first = getFirstPeriodInfo(nextDayKey);
+
+  mainDiv.textContent = "本日の授業はすべて終了しました";
+
+  if (!first) {
+    roomDiv.textContent = "";
+    itemsDiv.textContent = "";
+    leftDiv.textContent = `次の授業情報（${nextDayName}）が未設定です。`;
+    return;
+  }
+
+  // 教室・持ち物（ファイルがある場合だけ）
+  const periodNum = 1;
+
+  const room =
+    (typeof getRoom === "function") ? getRoom(nextDayKey, periodNum) : "教室未設定";
+
+  const itemList =
+    (typeof getItems === "function") ? getItems(nextDayKey, periodNum) : [];
+
+  const itemsText = itemList.length ? itemList.join("、") : "特になし";
+
+  roomDiv.textContent = `次回：${nextDayName}曜 ${first.period}（${first.start}〜）`;
+  itemsDiv.textContent = `科目：${first.subject || "未設定"} / 教室：${room}`;
+  leftDiv.textContent = `持ち物：${itemsText}`;
+  return;
+}
 
   mainDiv.textContent = "現在は授業時間外です";
   roomDiv.textContent = "";
