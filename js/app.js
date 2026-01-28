@@ -27,6 +27,34 @@ function getNowDayKey() {
   return null; // 土日
 }
 
+function getNextSchoolDayKey() {
+  // 今日以降で最初に来る「授業がある日(mon-fri)」を返す
+  // finished のときは「次の日」扱いにしたいので +1 から探す
+  const order = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+  const d = new Date();
+  let idx = d.getDay(); // 0-6
+  for (let step = 1; step <= 7; step++) {
+    const nextIdx = (idx + step) % 7;
+    const key = order[nextIdx];
+    if (key === "mon" || key === "tue" || key === "wed" || key === "thu" || key === "fri") {
+      return key;
+    }
+  }
+  return "mon";
+}
+
+function getFirstPeriodInfo(dayKey) {
+  const dayTable = timetable?.[dayKey];
+  if (!dayTable || dayTable.length === 0) return null;
+  const first = dayTable[0]; // 1時間目
+  return {
+    period: first.name,          // "1時間目"
+    subject: first.subject || "",// 科目
+    start: first.start,          // 開始時刻
+    end: first.end
+  };
+}
+
 function timeStringToMinutes(t) {
   const [h, m] = t.split(":").map(Number);
   return h * 60 + m;
