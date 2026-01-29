@@ -157,13 +157,28 @@ function render(state, dayKey, timeStr) {
       return;
     }
 
-    case "lunch": {
-      mainDiv.textContent = "今は昼休み";
-      roomDiv.textContent = "";
-      itemsDiv.textContent = "";
-      leftDiv.textContent = `残り ${minutesLeft(timeStr, state.end)} 分`;
-      return;
-    }
+   case "lunch": {
+  mainDiv.textContent = "今は昼休み";
+
+  const dayTable = window.timetable?.[dayKey] || [];
+  const next = dayTable.find(p => toMinutes(p.start) >= toMinutes(state.end)); 
+  // 昼休み終了時刻(state.end)以降に始まる最初の授業
+
+  if (next) {
+    const periodNum = next.period; // buildTimetableで period を入れているので確実
+    const room = getRoom(dayKey, periodNum);
+    const itemList = getItems(dayKey, periodNum);
+
+    roomDiv.textContent = `次は ${next.name}（${next.subject}） ${next.start}〜`;
+    itemsDiv.textContent = `教室：${room} / 持ち物：${itemList.length ? itemList.join("、") : "特になし"}`;
+  } else {
+    roomDiv.textContent = "";
+    itemsDiv.textContent = "";
+  }
+
+  leftDiv.textContent = `残り ${minutesLeft(timeStr, state.end)} 分`;
+  return;
+}
 
     case "break": {
       mainDiv.textContent = "今は休み時間";
