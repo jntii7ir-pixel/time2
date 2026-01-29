@@ -215,16 +215,17 @@ function update() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-// まず1回実行
-update();
+  // まず1回実行
+  update();
 
-// 次の「分」の境界に合わせて、その後は1分ごとに更新
-(function startMinuteAlignedReload() {
-  const now = new Date();
-  const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
+  // 次の「分」の境界に合わせて、その後は1分ごとに更新
+  (function startMinuteAlignedReload() {
+    const now = new Date();
+    const msToNextMinute = (60 - now.getSeconds()) * 1000 - now.getMilliseconds();
 
-  setTimeout(() => {
-    update();
-    setInterval(update, 60000);
-  }, msToNextMinute);
-})();
+    setTimeout(() => {
+      update();
+      setInterval(update, 60000);
+    }, msToNextMinute);
+  })();
+}); 
