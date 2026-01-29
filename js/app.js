@@ -111,8 +111,21 @@ function findCurrentState(dayKey, nowStr) {
     }
   }
 
-  // ここで「finished」を判定しているなら、outではなくfinishedを返すロジックが別にあるはず
-  // 既存コードの仕様を崩したくないので、ここは現状維持（out）
+  // 授業前 / 授業終了後の判定（ここを追加）
+  if (dayTable.length > 0) {
+    const firstStart = toMinutes(dayTable[0].start);
+    const lastEnd = toMinutes(dayTable[dayTable.length - 1].end);
+
+    // 授業が全部終わった後
+    if (now >= lastEnd) {
+      return { type: "finished" };
+    }
+
+    // 授業が始まる前（ここは out のままでOK）
+    if (now < firstStart) {
+      return { type: "out" };
+    }
+  }
   return { type: "out" };
 }
 
