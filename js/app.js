@@ -1,4 +1,5 @@
 // js/app.js
+// ========= 時刻ユーティリティ =========
 
 function pad2(n) {
   return String(n).padStart(2, "0");
@@ -9,22 +10,17 @@ function getNowTimeString() {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
-// "HH:MM" を 分 に変換
-function toMin(hhmm) {
+function toMinutes(hhmm) {
   const [h, m] = hhmm.split(":").map(Number);
   return h * 60 + m;
 }
 
-// nowStr("11:56") から endStr("12:45") までの残り分
 function minutesLeft(nowStr, endStr) {
   if (!nowStr || !endStr) return 0;
-
-  const now = toMin(nowStr);
-  const end = toMin(endStr);
-
-  // 同日内の想定。負になる場合は0扱いにする（授業外判定は別でやる前提）
-  return Math.max(0, end - now);
+  return Math.max(0, toMinutes(endStr) - toMinutes(nowStr));
 }
+
+// ========= データ参照（教室・持ち物） =========
 
 function getRoom(dayKey, periodNumber) {
   return rooms?.[dayKey]?.[periodNumber] || "教室未設定";
@@ -34,94 +30,72 @@ function getItems(dayKey, periodNumber) {
   return items?.[dayKey]?.[periodNumber] || [];
 }
 
+// ========= 曜日キー（mon〜fri） =========
+
 function getNowDayKey() {
-  const d = new Date().getDay();
-  if (d === 1) return "mon";
-  if (d === 2) return "tue";
-  if (d === 3) return "wed";
-  if (d === 4) return "thu";
-  if (d === 5) return "fri";
-  return null; // 土日
+  const d = new Date().getDay(); // 0(日)〜6(土)
+  const keys = [null, "mon", "tue", "wed", "thu", "fri", null];
+  return keys[d] ?? null; // 土日は null
 }
 
 function getNextSchoolDayKey() {
-  // 今日以降で最初に来る「授業がある日(mon-fri)」を返す
-  // finished のときは「次の日」扱いにしたいので +1 から探す
+  // 今日以降で最初に来る「授業がある日(mon-fri)」を返す（finished→翌日扱い）
   const order = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
-  const d = new Date();
-  let idx = d.getDay(); // 0-6
+  const idx = new Date().getDay(); // 0-6
+
   for (let step = 1; step <= 7; step++) {
-    const nextIdx = (idx + step) % 7;
-    const key = order[nextIdx];
-    if (key === "mon" || key === "tue" || key === "wed" || key === "thu" || key === "fri") {
-      return key;
-    }
+    const key = order[(idx + step) % 7];
+    if (key && key !== "sun" && key !== "sat") return key;
   }
   return "mon";
 }
 
+// ========= 時程（timetable/lunch）を使う判定 =========
+
 function getFirstPeriodInfo(dayKey) {
   const dayTable = timetable?.[dayKey];
   if (!dayTable || dayTable.length === 0) return null;
+
   const first = dayTable[0]; // 1時間目
   return {
-    period: first.name,          // "1時間目"
-    subject: first.subject || "",// 科目
-    start: first.start,          // 開始時刻
+    period: first.name,              // "1時間目"
+    subject: first.subject || "",    // 科目
+    start: first.start,              // 開始時刻
     end: first.end
   };
 }
 
-function timeStringToMinutes(t) {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function findCurrentState(dayKey, timeStr) {
-  const now = timeStringToMinutes(timeStr);
-
+function findCurrentState(dayKey, nowStr) {
   // 土日
-  if (!dayKey) {
-    return { type: "holiday" };
-  }
+  if (!dayKey) return { type: "holiday" };
+
+  const now = toMinutes(nowStr);
 
   // 昼休み
-  const lunchInfo = lunch[dayKey];
+  const lunchInfo = lunch?.[dayKey];
   if (lunchInfo) {
-    const s = timeStringToMinutes(lunchInfo.start);
-    const e = timeStringToMinutes(lunchInfo.end);
-    if (now >= s && now < e) {
-      return { type: "lunch", ...lunchInfo };
-    }
+    const s = toMinutes(lunchInfo.start);
+    const e = toMinutes(lunchInfo.end);
+    if (now >= s && now < e) return { type: "lunch", ...lunchInfo };
   }
 
-  const dayTable = timetable[dayKey];
+  const dayTable = timetable?.[dayKey] || [];
 
   // 授業中
   for (const p of dayTable) {
-    const s = timeStringToMinutes(p.start);
-    const e = timeStringToMinutes(p.end);
+    const s = toMinutes(p.start);
+    const e = toMinutes(p.end);
     if (now >= s && now < e) {
-      return {
-        type: "class",
-        period: p.name,
-        subject: p.subject,
-        start: p.start,
-        end: p.end
-      };
+      return { type: "class", period: p.name, subject: p.subject, start: p.start, end: p.end };
     }
   }
 
-  // 休み時間
+  // 休み時間（次の授業を表示）
   for (let i = 0; i < dayTable.length - 1; i++) {
-    const curEnd = timeStringToMinutes(dayTable[i].end);
-    const nextStart = timeStringToMinutes(dayTable[i + 1].start);
+    const curEnd = toMinutes(dayTable[i].end);
+    const nextStart = toMinutes(dayTable[i + 1].start);
     if (now >= curEnd && now < nextStart) {
-      return {
-        type: "break",
-        next: dayTable[i + 1].name,
-        nextSubject: dayTable[i + 1].subject
-      };
+      return { type: "break", next: dayTable[i + 1].name, nextSubject: dayTable[i + 1].subject };
     }
   }
 
