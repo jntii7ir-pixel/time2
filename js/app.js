@@ -9,6 +9,23 @@ function getNowTimeString() {
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
 
+// "HH:MM" を 分 に変換
+function toMin(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
+}
+
+// nowStr("11:56") から endStr("12:45") までの残り分
+function minutesLeft(nowStr, endStr) {
+  if (!nowStr || !endStr) return 0;
+
+  const now = toMin(nowStr);
+  const end = toMin(endStr);
+
+  // 同日内の想定。負になる場合は0扱いにする（授業外判定は別でやる前提）
+  return Math.max(0, end - now);
+}
+
 function getRoom(dayKey, periodNumber) {
   return rooms?.[dayKey]?.[periodNumber] || "教室未設定";
 }
