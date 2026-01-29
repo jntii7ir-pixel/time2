@@ -66,7 +66,7 @@ function getNextSchoolDayKey() {
 // ==============================
 
 function getFirstPeriodInfo(dayKey) {
-  const dayTable = timetable?.[dayKey];
+  const dayTable = window.timetable?.[dayKey];
   if (!dayTable || dayTable.length === 0) return null;
 
   const first = dayTable[0];
@@ -84,14 +84,14 @@ function findCurrentState(dayKey, nowStr) {
   const now = toMinutes(nowStr);
 
   // 昼休み
-  const lunchInfo = lunch?.[dayKey];
+  const lunchInfo = window.lunch?.[dayKey];
   if (lunchInfo) {
     const s = toMinutes(lunchInfo.start);
     const e = toMinutes(lunchInfo.end);
     if (now >= s && now < e) return { type: "lunch", ...lunchInfo };
   }
 
-  const dayTable = timetable?.[dayKey] || [];
+  const dayTable = window.timetable?.[dayKey] || [];
 
   // 授業中
   for (const p of dayTable) {
