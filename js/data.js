@@ -129,3 +129,17 @@ function buildTimetableForDay(dayKey) {
 
   return table;
 }
+
+// ===== timetable を生成して公開 =====
+window.timetable = {
+  mon: buildTimetableForDay("mon"),
+  tue: buildTimetableForDay("tue"),
+  wed: buildTimetableForDay("wed"),
+  thu: buildTimetableForDay("thu"),
+  fri: buildTimetableForDay("fri"),
+};
+
+// （任意：デバッグしやすくする。不要なら消してOK）
+window.settings = settings;
+window.dayPlan = dayPlan;
+window.details = details;
