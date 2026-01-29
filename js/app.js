@@ -109,75 +109,75 @@ function render(state, dayKey, timeStr) {
   const itemsDiv = document.getElementById("items");
   const leftDiv = document.getElementById("left");
 
-  const dayName = { mon:"月", tue:"火", wed:"水", thu:"木", fri:"金" }[dayKey];
+  const dayLabelMap = { mon: "月", tue: "火", wed: "水", thu: "木", fri: "金" };
+  const dayName = dayLabelMap[dayKey] ?? "";
 
-  nowDiv.textContent = `${dayName}曜日 ${timeStr}`;
+  nowDiv.textContent = dayName ? `${dayName}曜日 ${timeStr}` : `${timeStr}`;
 
-  if (state.type === "class") {
-    const periodNum = Number(state.period.replace("時間目", ""));
-    const room = getRoom(dayKey, periodNum);
-    const itemList = getItems(dayKey, periodNum);
-    const left = minutesLeft(timeStr, state.end);
+  switch (state.type) {
+    case "class": {
+      const periodNum = Number(state.period.replace("時間目", ""));
+      const room = getRoom(dayKey, periodNum);
+      const itemList = getItems(dayKey, periodNum);
+      const left = minutesLeft(timeStr, state.end);
 
-    mainDiv.textContent = `今は ${state.period}（${state.subject}）`;
-    roomDiv.textContent = `教室：${room}`;
-    itemsDiv.textContent = `持ち物：${itemList.length ? itemList.join("、") : "特になし"}`;
-    leftDiv.textContent = `終了まであと ${left} 分`;
-    return;
+      mainDiv.textContent = `今は ${state.period}（${state.subject}）`;
+      roomDiv.textContent = `教室：${room}`;
+      itemsDiv.textContent = `持ち物：${itemList.length ? itemList.join("、") : "特になし"}`;
+      leftDiv.textContent = `終了まであと ${left} 分`;
+      return;
+    }
+
+    case "lunch": {
+      mainDiv.textContent = "今は昼休み";
+      roomDiv.textContent = "";
+      itemsDiv.textContent = "";
+      leftDiv.textContent = `残り ${minutesLeft(timeStr, state.end)} 分`;
+      return;
+    }
+
+    case "break": {
+      mainDiv.textContent = "今は休み時間";
+      roomDiv.textContent = "";
+      itemsDiv.textContent = `次は ${state.next}（${state.nextSubject}）`;
+      leftDiv.textContent = "";
+      return;
+    }
+
+    case "finished": {
+      const nextDayKey = getNextSchoolDayKey();
+      const nextDayName = dayLabelMap[nextDayKey] ?? "";
+      const first = getFirstPeriodInfo(nextDayKey);
+
+      mainDiv.textContent = "本日の授業はすべて終了しました";
+
+      if (!first) {
+        roomDiv.textContent = "";
+        itemsDiv.textContent = "";
+        leftDiv.textContent = `次の授業情報（${nextDayName}）が未設定です。`;
+        return;
+      }
+
+      // 次回は「1時間目」の情報を出す想定
+      const periodNum = 1;
+      const room = getRoom(nextDayKey, periodNum);
+      const itemList = getItems(nextDayKey, periodNum);
+      const itemsText = itemList.length ? itemList.join("、") : "特になし";
+
+      roomDiv.textContent = `次回：${nextDayName}曜 ${first.period}（${first.start}〜）`;
+      itemsDiv.textContent = `科目：${first.subject || "未設定"} / 教室：${room}`;
+      leftDiv.textContent = `持ち物：${itemsText}`;
+      return;
+    }
+
+    default: {
+      mainDiv.textContent = "現在は授業時間外です";
+      roomDiv.textContent = "";
+      itemsDiv.textContent = "";
+      leftDiv.textContent = "";
+      return;
+    }
   }
-
-  if (state.type === "lunch") {
-    mainDiv.textContent = "今は昼休み";
-    roomDiv.textContent = "";
-    itemsDiv.textContent = "";
-    leftDiv.textContent = `残り ${minutesLeft(timeStr, state.end)} 分`;
-    return;
-  }
-
-  if (state.type === "break") {
-    mainDiv.textContent = "今は休み時間";
-    roomDiv.textContent = "";
-    itemsDiv.textContent = `次は ${state.next}（${state.nextSubject}）`;
-    leftDiv.textContent = "";
-    return;
-  }
-  
-if (state.type === "finished") {
-  const nextDayKey = getNextSchoolDayKey();
-  const nextDayName = { mon:"月", tue:"火", wed:"水", thu:"木", fri:"金" }[nextDayKey];
-
-  const first = getFirstPeriodInfo(nextDayKey);
-
-  mainDiv.textContent = "本日の授業はすべて終了しました";
-
-  if (!first) {
-    roomDiv.textContent = "";
-    itemsDiv.textContent = "";
-    leftDiv.textContent = `次の授業情報（${nextDayName}）が未設定です。`;
-    return;
-  }
-
-  // 教室・持ち物（ファイルがある場合だけ）
-  const periodNum = 1;
-
-  const room =
-    (typeof getRoom === "function") ? getRoom(nextDayKey, periodNum) : "教室未設定";
-
-  const itemList =
-    (typeof getItems === "function") ? getItems(nextDayKey, periodNum) : [];
-
-  const itemsText = itemList.length ? itemList.join("、") : "特になし";
-
-  roomDiv.textContent = `次回：${nextDayName}曜 ${first.period}（${first.start}〜）`;
-  itemsDiv.textContent = `科目：${first.subject || "未設定"} / 教室：${room}`;
-  leftDiv.textContent = `持ち物：${itemsText}`;
-  return;
-}
-
-  mainDiv.textContent = "現在は授業時間外です";
-  roomDiv.textContent = "";
-  itemsDiv.textContent = "";
-  leftDiv.textContent = "";
 }
 
 function update() {
