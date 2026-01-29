@@ -1,5 +1,14 @@
 // js/app.js
-// ========= 時刻ユーティリティ =========
+// ==============================
+// 1) 定数
+// ==============================
+
+const DAY_LABEL = { mon: "月", tue: "火", wed: "水", thu: "木", fri: "金" };
+const DAY_ORDER = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+
+// ==============================
+// 2) 時刻ユーティリティ
+// ==============================
 
 function pad2(n) {
   return String(n).padStart(2, "0");
@@ -20,7 +29,9 @@ function minutesLeft(nowStr, endStr) {
   return Math.max(0, toMinutes(endStr) - toMinutes(nowStr));
 }
 
-// ========= データ参照（教室・持ち物） =========
+// ==============================
+// 3) データ参照（教室・持ち物）
+// ==============================
 
 function getRoom(dayKey, periodNumber) {
   return rooms?.[dayKey]?.[periodNumber] || "教室未設定";
@@ -30,7 +41,9 @@ function getItems(dayKey, periodNumber) {
   return items?.[dayKey]?.[periodNumber] || [];
 }
 
-// ========= 曜日キー（mon〜fri） =========
+// ==============================
+// 4) 曜日キー（mon〜fri）
+// ==============================
 
 function getNowDayKey() {
   const d = new Date().getDay(); // 0(日)〜6(土)
@@ -40,33 +53,32 @@ function getNowDayKey() {
 
 function getNextSchoolDayKey() {
   // 今日以降で最初に来る「授業がある日(mon-fri)」を返す（finished→翌日扱い）
-  const order = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
   const idx = new Date().getDay(); // 0-6
-
   for (let step = 1; step <= 7; step++) {
-    const key = order[(idx + step) % 7];
+    const key = DAY_ORDER[(idx + step) % 7];
     if (key && key !== "sun" && key !== "sat") return key;
   }
   return "mon";
 }
 
-// ========= 時程（timetable/lunch）を使う判定 =========
+// ==============================
+// 5) 判定ロジック
+// ==============================
 
 function getFirstPeriodInfo(dayKey) {
   const dayTable = timetable?.[dayKey];
   if (!dayTable || dayTable.length === 0) return null;
 
-  const first = dayTable[0]; // 1時間目
+  const first = dayTable[0];
   return {
-    period: first.name,              // "1時間目"
-    subject: first.subject || "",    // 科目
-    start: first.start,              // 開始時刻
-    end: first.end
+    period: first.name,
+    subject: first.subject || "",
+    start: first.start,
+    end: first.end,
   };
 }
 
 function findCurrentState(dayKey, nowStr) {
-  // 土日
   if (!dayKey) return { type: "holiday" };
 
   const now = toMinutes(nowStr);
@@ -90,7 +102,7 @@ function findCurrentState(dayKey, nowStr) {
     }
   }
 
-  // 休み時間（次の授業を表示）
+  // 休み時間
   for (let i = 0; i < dayTable.length - 1; i++) {
     const curEnd = toMinutes(dayTable[i].end);
     const nextStart = toMinutes(dayTable[i + 1].start);
@@ -99,8 +111,14 @@ function findCurrentState(dayKey, nowStr) {
     }
   }
 
+  // ここで「finished」を判定しているなら、outではなくfinishedを返すロジックが別にあるはず
+  // 既存コードの仕様を崩したくないので、ここは現状維持（out）
   return { type: "out" };
 }
+
+// ==============================
+// 6) 表示（UI）
+// ==============================
 
 function render(state, dayKey, timeStr) {
   const nowDiv = document.getElementById("now");
@@ -109,9 +127,7 @@ function render(state, dayKey, timeStr) {
   const itemsDiv = document.getElementById("items");
   const leftDiv = document.getElementById("left");
 
-  const dayLabelMap = { mon: "月", tue: "火", wed: "水", thu: "木", fri: "金" };
-  const dayName = dayLabelMap[dayKey] ?? "";
-
+  const dayName = DAY_LABEL[dayKey] ?? "";
   nowDiv.textContent = dayName ? `${dayName}曜日 ${timeStr}` : `${timeStr}`;
 
   switch (state.type) {
@@ -146,7 +162,7 @@ function render(state, dayKey, timeStr) {
 
     case "finished": {
       const nextDayKey = getNextSchoolDayKey();
-      const nextDayName = dayLabelMap[nextDayKey] ?? "";
+      const nextDayName = DAY_LABEL[nextDayKey] ?? "";
       const first = getFirstPeriodInfo(nextDayKey);
 
       mainDiv.textContent = "本日の授業はすべて終了しました";
@@ -158,7 +174,6 @@ function render(state, dayKey, timeStr) {
         return;
       }
 
-      // 次回は「1時間目」の情報を出す想定
       const periodNum = 1;
       const room = getRoom(nextDayKey, periodNum);
       const itemList = getItems(nextDayKey, periodNum);
@@ -180,8 +195,11 @@ function render(state, dayKey, timeStr) {
   }
 }
 
+// ==============================
+// 7) 起動・更新スケジューラ
+// ==============================
+
 function update() {
-  const result = document.getElementById("result");
   const dayKey = getNowDayKey();
   const timeStr = getNowTimeString();
   const state = findCurrentState(dayKey, timeStr);
@@ -189,7 +207,6 @@ function update() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  // まず1回実行
   update();
 
   // 次の「分」の境界に合わせて、その後は1分ごとに更新
@@ -202,5 +219,4 @@ window.addEventListener("DOMContentLoaded", () => {
       setInterval(update, 60000);
     }, msToNextMinute);
   })();
-}); 
-
+});
