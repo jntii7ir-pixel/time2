@@ -110,16 +110,22 @@ function buildTimetableForDay(dayKey) {
       subject: details[dayKey]?.[i]?.subject || ""
     });
 
-    t = end + (i === plan.periods ? 0 : settings.breakMinutes);
+    // 最終コマの後は進めない
+    if (i === plan.periods) break;
+
+    // 休み時間（通常は10分、ただし4限→5限は昼休み）
+    let gap = settings.breakMinutes;
+
+    // 4限の後だけ昼休みを適用
+    if (i === 4) {
+      const li = window.lunch?.[dayKey];
+      if (li?.start && li?.end) {
+        gap = timeStringToMinutes(li.end) - timeStringToMinutes(li.start); // だいたい45分
+      }
+    }
+
+    t = end + gap;
   }
 
   return table;
 }
-
-const timetable = {
-  mon: buildTimetableForDay("mon"),
-  tue: buildTimetableForDay("tue"),
-  wed: buildTimetableForDay("wed"),
-  thu: buildTimetableForDay("thu"),
-  fri: buildTimetableForDay("fri")
-};
