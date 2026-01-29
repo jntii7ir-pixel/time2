@@ -23,7 +23,7 @@ const dayPlan = {
 };
 
 // 昼休み（必ず定義する）
-const lunch = {
+window.lunch = {
   mon: { start: "12:25", end: "13:10" },
   tue: { start: "12:45", end: "13:30" }, // 必要なら後で修正
   wed: { start: "12:45", end: "13:30" },
